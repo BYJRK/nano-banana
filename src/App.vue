@@ -543,10 +543,33 @@ const showGemini3ProConfig = computed(() => {
     return modelId.includes('gemini-3-pro-image')
 })
 
+const maybeRequestNotificationPermission = () => {
+    if (typeof window === 'undefined') return
+    if (!('Notification' in window)) return
+    if (Notification.permission === 'default') {
+        Notification.requestPermission().catch(() => {})
+    }
+}
+
+const notifyGenerationComplete = (count: number, sourceLabel: string) => {
+    if (typeof window === 'undefined') return
+    if (!('Notification' in window)) return
+    if (Notification.permission !== 'granted') return
+
+    const title = '🍌 生成完成'
+    const body = `已完成${sourceLabel}，共生成 ${count} 张图片。`
+    try {
+        new Notification(title, { body })
+    } catch {
+        // 忽略通知失败（例如被浏览器策略阻止）
+    }
+}
+
 const handleTextToImageGenerate = async () => {
     if (!canGenerateTextImage.value) return
 
     latestResultSource.value = 'text'
+    maybeRequestNotificationPermission()
     isTextToImageLoading.value = true
     textToImageError.value = null
     textToImageResult.value = []
@@ -574,6 +597,9 @@ const handleTextToImageGenerate = async () => {
         const response = await generateImage(request)
         textToImageResult.value = response.imageUrls
         latestResultSource.value = 'text'
+        if (response.imageUrls.length > 0) {
+            notifyGenerationComplete(response.imageUrls.length, '文生图')
+        }
     } catch (err) {
         textToImageError.value = err instanceof Error ? err.message : '生成失败'
         textToImageResult.value = []
@@ -624,6 +650,7 @@ const handleGenerate = async () => {
     if (!canGenerate.value) return
 
     latestResultSource.value = 'image'
+    maybeRequestNotificationPermission()
     isLoading.value = true
     error.value = null
     // 立即清除之前的结果，确保用户看到新的生成过程
@@ -655,6 +682,9 @@ const handleGenerate = async () => {
         const response = await generateImage(request)
         result.value = response.imageUrls
         latestResultSource.value = 'image'
+        if (response.imageUrls.length > 0) {
+            notifyGenerationComplete(response.imageUrls.length, '图文生图')
+        }
     } catch (err) {
         error.value = err instanceof Error ? err.message : '生成失败'
         // 生成失败时也要清除结果
