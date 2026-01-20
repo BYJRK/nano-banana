@@ -565,6 +565,21 @@ const notifyGenerationComplete = (count: number, sourceLabel: string) => {
     }
 }
 
+const notifyGenerationFailed = (message: string, sourceLabel: string) => {
+    if (typeof window === 'undefined') return
+    if (!('Notification' in window)) return
+    if (Notification.permission !== 'granted') return
+
+    const title = '🍌 生成失败'
+    const safeMessage = message?.trim() || '请稍后再试。'
+    const body = `${sourceLabel}失败：${safeMessage}`
+    try {
+        new Notification(title, { body })
+    } catch {
+        // 忽略通知失败（例如被浏览器策略阻止）
+    }
+}
+
 const handleTextToImageGenerate = async () => {
     if (!canGenerateTextImage.value) return
 
@@ -601,8 +616,10 @@ const handleTextToImageGenerate = async () => {
             notifyGenerationComplete(response.imageUrls.length, '文生图')
         }
     } catch (err) {
-        textToImageError.value = err instanceof Error ? err.message : '生成失败'
+        const message = err instanceof Error ? err.message : '生成失败'
+        textToImageError.value = message
         textToImageResult.value = []
+        notifyGenerationFailed(message, '文生图')
     } finally {
         isTextToImageLoading.value = false
     }
@@ -686,9 +703,11 @@ const handleGenerate = async () => {
             notifyGenerationComplete(response.imageUrls.length, '图文生图')
         }
     } catch (err) {
-        error.value = err instanceof Error ? err.message : '生成失败'
+        const message = err instanceof Error ? err.message : '生成失败'
+        error.value = message
         // 生成失败时也要清除结果
         result.value = []
+        notifyGenerationFailed(message, '图文生图')
     } finally {
         isLoading.value = false
     }
