@@ -4,7 +4,16 @@
             <!-- Loading State -->
             <div v-if="loading" class="text-center">
                 <div class="w-12 h-12 border-4 border-yellow-300 border-t-orange-500 rounded-full animate-spin mx-auto mb-4" />
-                <p class="font-bold text-base flex items-center justify-center gap-2">🍌 正在创造魔法...</p>
+                <p class="font-bold text-base flex items-center justify-center gap-2">
+                    🍌 正在创造魔法...
+                    <button
+                        v-if="showCancel"
+                        @click="$emit('cancel')"
+                        class="text-sm text-blue-600 underline hover:text-blue-700"
+                    >
+                        取消
+                    </button>
+                </p>
                 <p class="text-gray-600">请稍等片刻</p>
             </div>
 
@@ -62,6 +71,7 @@ const props = defineProps<{
     loading: boolean
     error: string | null
     canPush: boolean
+    showCancel: boolean
 }>()
 
 const imageSizes = ref<Record<string, string>>({})
@@ -92,5 +102,6 @@ const onImageLoad = (event: Event, image: string) => {
 defineEmits<{
     download: [image: string]
     push: [image: string]
+    cancel: []
 }>()
 </script>

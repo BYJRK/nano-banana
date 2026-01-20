@@ -161,8 +161,10 @@
                     :loading="displayLoading"
                     :error="displayError"
                     :can-push="canPushDisplayResult"
+                    :show-cancel="canCancelGenerate"
                     @download="handleDownloadResult"
                     @push="handlePushDisplayResult"
+                    @cancel="handleCancelGenerate"
                 />
             </div>
 
@@ -207,6 +209,8 @@ const isFetchingModels = ref(false)
 const modelsError = ref<string | null>(null)
 const selectedAspectRatio = ref('1:1')  // 默认宽高比为 1:1
 let hasSyncedInitialEndpoint = false
+const textToImageAbortController = ref<AbortController | null>(null)
+const imageToImageAbortController = ref<AbortController | null>(null)
 
 // Gemini 3 Pro Image 配置状态
 const gemini3ImageSize = ref('2K')  // 默认图像尺寸
@@ -510,6 +514,8 @@ const displayError = computed(() => {
     return error.value || textToImageError.value
 })
 
+const canCancelGenerate = computed(() => displayLoading.value)
+
 const canPushDisplayResult = computed(() => Boolean(displayResults.value.length > 0))
 
 const canGenerateTextImage = computed(
@@ -549,6 +555,9 @@ const showGemini3ProConfig = computed(() => {
     if (!modelId) return false
     return modelId.includes('gemini-3-pro-image')
 })
+
+const isAbortError = (err: unknown): err is Error =>
+    err instanceof Error && err.name === 'AbortError'
 
 const maybeRequestNotificationPermission = () => {
     if (typeof window === 'undefined') return
@@ -592,6 +601,8 @@ const handleTextToImageGenerate = async () => {
 
     latestResultSource.value = 'text'
     maybeRequestNotificationPermission()
+    textToImageAbortController.value?.abort()
+    textToImageAbortController.value = new AbortController()
     isTextToImageLoading.value = true
     textToImageError.value = null
     textToImageResult.value = []
@@ -616,19 +627,25 @@ const handleTextToImageGenerate = async () => {
             request.enableGoogleSearch = gemini3EnableGoogleSearch.value
         }
 
-        const response = await generateImage(request)
+        const response = await generateImage(request, 5, textToImageAbortController.value?.signal)
         textToImageResult.value = response.imageUrls
         latestResultSource.value = 'text'
         if (response.imageUrls.length > 0) {
             notifyGenerationComplete(response.imageUrls.length, '文生图')
         }
     } catch (err) {
-        const message = err instanceof Error ? err.message : '生成失败'
-        textToImageError.value = message
-        textToImageResult.value = []
-        notifyGenerationFailed(message, '文生图')
+        if (isAbortError(err)) {
+            textToImageError.value = '已取消生成'
+            textToImageResult.value = []
+        } else {
+            const message = err instanceof Error ? err.message : '生成失败'
+            textToImageError.value = message
+            textToImageResult.value = []
+            notifyGenerationFailed(message, '文生图')
+        }
     } finally {
         isTextToImageLoading.value = false
+        textToImageAbortController.value = null
     }
 }
 
@@ -675,6 +692,8 @@ const handleGenerate = async () => {
 
     latestResultSource.value = 'image'
     maybeRequestNotificationPermission()
+    imageToImageAbortController.value?.abort()
+    imageToImageAbortController.value = new AbortController()
     isLoading.value = true
     error.value = null
     // 立即清除之前的结果，确保用户看到新的生成过程
@@ -703,20 +722,45 @@ const handleGenerate = async () => {
             request.enableGoogleSearch = gemini3EnableGoogleSearch.value
         }
 
-        const response = await generateImage(request)
+        const response = await generateImage(request, 5, imageToImageAbortController.value?.signal)
         result.value = response.imageUrls
         latestResultSource.value = 'image'
         if (response.imageUrls.length > 0) {
             notifyGenerationComplete(response.imageUrls.length, '图文生图')
         }
     } catch (err) {
-        const message = err instanceof Error ? err.message : '生成失败'
-        error.value = message
-        // 生成失败时也要清除结果
-        result.value = []
-        notifyGenerationFailed(message, '图文生图')
+        if (isAbortError(err)) {
+            error.value = '已取消生成'
+            result.value = []
+        } else {
+            const message = err instanceof Error ? err.message : '生成失败'
+            error.value = message
+            // 生成失败时也要清除结果
+            result.value = []
+            notifyGenerationFailed(message, '图文生图')
+        }
     } finally {
         isLoading.value = false
+        imageToImageAbortController.value = null
+    }
+}
+
+const handleCancelGenerate = () => {
+    if (latestResultSource.value === 'text') {
+        textToImageAbortController.value?.abort()
+        return
+    }
+
+    if (latestResultSource.value === 'image') {
+        imageToImageAbortController.value?.abort()
+        return
+    }
+
+    if (isTextToImageLoading.value) {
+        textToImageAbortController.value?.abort()
+    }
+    if (isLoading.value) {
+        imageToImageAbortController.value?.abort()
     }
 }
 

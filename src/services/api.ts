@@ -1,7 +1,7 @@
 import type { ApiModel, GenerateRequest, GenerateResponse, ModelListResponse } from '../types'
 import { DEFAULT_API_ENDPOINT, DEFAULT_MODEL_ID } from '../config/api'
 
-export async function generateImage(request: GenerateRequest, maxRetries: number = 5): Promise<GenerateResponse> {
+export async function generateImage(request: GenerateRequest, maxRetries: number = 5, signal?: AbortSignal): Promise<GenerateResponse> {
     let lastError: Error | null = null
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -68,7 +68,8 @@ export async function generateImage(request: GenerateRequest, maxRetries: number
                     Authorization: `Bearer ${request.apikey}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(payload)
+                body: JSON.stringify(payload),
+                signal
             })
 
             if (!response.ok) {
@@ -129,6 +130,9 @@ export async function generateImage(request: GenerateRequest, maxRetries: number
             }
 
         } catch (err) {
+            if (err instanceof Error && err.name === 'AbortError') {
+                throw err
+            }
             // 对于网络错误或API错误，也进行重试
             lastError = err instanceof Error ? err : new Error(String(err))
             console.error(`第 ${attempt} 次尝试出错:`, lastError.message)
