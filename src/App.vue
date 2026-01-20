@@ -173,7 +173,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import ApiKeyInput from './components/ApiKeyInput.vue'
 import ImageUpload from './components/ImageUpload.vue'
 import StylePromptSelector from './components/StylePromptSelector.vue'
@@ -218,8 +218,10 @@ onMounted(() => {
     const savedEndpoint = LocalStorage.getApiEndpoint()
     const savedModelId = LocalStorage.getModelId()
 
-    if (savedApiKey) {
-        apiKey.value = savedApiKey
+    const trimmedApiKey = (savedApiKey || '').trim()
+
+    if (trimmedApiKey) {
+        apiKey.value = trimmedApiKey
         showApiSettings.value = false
     } else {
         // 如果没有API密钥，自动展开设置面板
@@ -239,8 +241,10 @@ onMounted(() => {
 
     ensureSelectedOptionPresent()
 
-    // 最后才标记初始化完成，这样后续的 watch 触发才会被当作用户操作
-    hasSyncedInitialEndpoint = true
+    // 最后才标记初始化完成，避免初始化赋值触发自动展开
+    nextTick(() => {
+        hasSyncedInitialEndpoint = true
+    })
 })
 
 // 监听API密钥变化，自动保存到本地存储
@@ -250,6 +254,9 @@ watch(
         const trimmed = newApiKey.trim()
         if (trimmed) {
             LocalStorage.saveApiKey(trimmed)
+            if (showApiSettings.value) {
+                showApiSettings.value = false
+            }
         } else {
             LocalStorage.clearApiKey()
             if ((previousApiKey || '').trim()) {
