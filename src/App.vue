@@ -258,9 +258,6 @@ watch(
         const trimmed = newApiKey.trim()
         if (trimmed) {
             LocalStorage.saveApiKey(trimmed)
-            if (showApiSettings.value) {
-                showApiSettings.value = false
-            }
         } else {
             LocalStorage.clearApiKey()
             if ((previousApiKey || '').trim()) {
