@@ -11,16 +11,16 @@
 
                     <!-- 版权信息 -->
                     <div class="border-t border-gray-600 pt-4">
-                        <p class="text-gray-400 text-xs">© 2025 Nano Banana. Made with 🍌 and ❤️</p>
+                        <p class="text-gray-400 text-xs">© 2026 Nano Banana. Made with 🍌 and ❤️</p>
                         <p class="text-gray-500 text-xs mt-1">
                             Modified by
-                            <a href="https://github.com/hkfires/nano-banana/" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 hover:underline transition-colors">
-                                hKFirEs
+                            <a href="https://github.com/BYJRK/nano-banana" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 hover:underline transition-colors">
+                                ColdWind
                             </a>
                             •
                             Forked from
-                            <a href="https://github.com/liu-ziting/nano-banana" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 hover:underline transition-colors">
-                                Liuziting
+                            <a href="https://github.com/hkfires/nano-banana/" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 hover:underline transition-colors">
+                                hKFirEs
                             </a>
                         </p>
                     </div>
