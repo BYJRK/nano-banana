@@ -157,7 +157,25 @@
 
             <!-- 生成结果区域：全宽 -->
             <div class="w-full">
-                <div class="bg-black text-white font-bold px-4 py-2 rounded-t-lg border-4 border-black border-b-0 flex items-center gap-2">✨ 生成结果</div>
+                <div class="bg-black text-white font-bold px-4 py-2 rounded-t-lg border-4 border-black border-b-0 flex items-center justify-between gap-2">
+                    <span>✨ 生成结果</span>
+                    <div class="flex items-center gap-1 text-sm font-normal">
+                        <span class="text-gray-300 mr-1">保存格式：</span>
+                        <button
+                            v-for="opt in saveFormatOptions"
+                            :key="opt.value"
+                            @click="saveFormat = opt.value"
+                            :class="[
+                                'px-2 py-0.5 rounded border-2 font-bold transition-colors',
+                                saveFormat === opt.value
+                                    ? 'bg-yellow-300 text-black border-yellow-300'
+                                    : 'bg-transparent text-gray-300 border-gray-500 hover:border-gray-300 hover:text-white'
+                            ]"
+                        >
+                            {{ opt.label }}
+                        </button>
+                    </div>
+                </div>
                 <ResultDisplay
                     :results="displayResults"
                     :loading="displayLoading"
@@ -213,6 +231,13 @@ const selectedAspectRatio = ref('1:1')  // 默认宽高比为 1:1
 let hasSyncedInitialEndpoint = false
 const textToImageAbortController = ref<AbortController | null>(null)
 const imageToImageAbortController = ref<AbortController | null>(null)
+const saveFormat = ref<'png' | 'jpg' | 'webp'>('png')
+
+const saveFormatOptions: { value: 'png' | 'jpg' | 'webp'; label: string }[] = [
+    { value: 'png', label: 'PNG' },
+    { value: 'jpg', label: 'JPG' },
+    { value: 'webp', label: 'WebP' },
+]
 
 // Gemini 3 Pro Image 配置状态
 const gemini3ImageSize = ref('2K')  // 默认图像尺寸
@@ -678,32 +703,77 @@ const handleDownloadResult = async (image: string) => {
     if (!image) return
     if (typeof window === 'undefined') return
 
-    let downloadUrl = image
-    let revokeUrl: string | null = null
+    const format = saveFormat.value
+    const mimeType = format === 'jpg' ? 'image/jpeg' : format === 'webp' ? 'image/webp' : 'image/png'
+    const extension = format === 'jpg' ? 'jpg' : format
+    const filename = `nano-banana-${Date.now()}.${extension}`
 
     try {
+        // 1. 获取原始图片的 Blob / data URL
+        let sourceUrl = image
+        let tempObjectUrl: string | null = null
         if (!image.startsWith('data:')) {
-            const response = await fetch(image)
-            const blob = await response.blob()
-            downloadUrl = URL.createObjectURL(blob)
-            revokeUrl = downloadUrl
+            const resp = await fetch(image)
+            const blob = await resp.blob()
+            tempObjectUrl = URL.createObjectURL(blob)
+            sourceUrl = tempObjectUrl
         }
 
-        const link = document.createElement('a')
-        const dataMatch = image.match(/^data:image\/([a-zA-Z0-9+]+);/)
-        const extension = dataMatch ? dataMatch[1] : 'png'
+        // 2. 如果目标格式与源格式相同，直接下载无需转换
+        const sourceMatch = image.match(/^data:image\/([a-zA-Z0-9+]+);/)
+        const sourceExt = sourceMatch ? sourceMatch[1].replace('jpeg', 'jpg') : 'png'
+        if (sourceExt === extension && image.startsWith('data:')) {
+            const link = document.createElement('a')
+            link.href = image
+            link.download = filename
+            link.rel = 'noopener'
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+            if (tempObjectUrl) URL.revokeObjectURL(tempObjectUrl)
+            return
+        }
 
-        link.href = downloadUrl
-        link.download = `nano-banana-${Date.now()}.${extension}`
+        // 3. 用 Canvas 转换格式
+        const img = new Image()
+        await new Promise<void>((resolve, reject) => {
+            img.onload = () => resolve()
+            img.onerror = () => reject(new Error('图片加载失败'))
+            img.src = sourceUrl
+        })
+        if (tempObjectUrl) URL.revokeObjectURL(tempObjectUrl)
+
+        const canvas = document.createElement('canvas')
+        canvas.width = img.naturalWidth
+        canvas.height = img.naturalHeight
+        const ctx = canvas.getContext('2d')
+        if (!ctx) throw new Error('无法创建 Canvas 上下文')
+
+        // JPEG 不支持透明通道，先铺白底
+        if (format === 'jpg') {
+            ctx.fillStyle = '#ffffff'
+            ctx.fillRect(0, 0, canvas.width, canvas.height)
+        }
+        ctx.drawImage(img, 0, 0)
+
+        const quality = (format === 'jpg' || format === 'webp') ? 0.92 : undefined
+        const convertedBlob = await new Promise<Blob>((resolve, reject) => {
+            canvas.toBlob(blob => {
+                if (blob) resolve(blob)
+                else reject(new Error('Canvas 转换失败'))
+            }, mimeType, quality)
+        })
+
+        const blobUrl = URL.createObjectURL(convertedBlob)
+        const link = document.createElement('a')
+        link.href = blobUrl
+        link.download = filename
         link.rel = 'noopener'
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
-
-        if (revokeUrl) {
-            URL.revokeObjectURL(revokeUrl)
-        }
-    } catch (downloadError) {
+        URL.revokeObjectURL(blobUrl)
+    } catch {
         window.open(image, '_blank', 'noopener')
     }
 }
