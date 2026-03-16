@@ -1,5 +1,5 @@
 <template>
-    <div class="min-h-screen bg-gradient-to-br from-yellow-200 via-yellow-300 to-orange-200 text-gray-900 relative overflow-hidden">
+    <div class="min-h-screen bg-gradient-to-br from-yellow-200 via-yellow-300 to-orange-200 dark:from-gray-950 dark:via-gray-900 dark:to-gray-950 text-gray-900 dark:text-gray-100 relative overflow-hidden">
         <!-- 香蕉装饰元素 -->
         <div class="absolute top-10 left-10 text-6xl opacity-20 animate-bounce">🍌</div>
         <div class="absolute top-32 right-20 text-4xl opacity-30 animate-pulse">🍌</div>
@@ -9,8 +9,11 @@
         <div class="container mx-auto px-3 py-4 relative z-10">
             <!-- Header -->
             <div class="relative mb-6">
-                <div class="bg-gradient-to-r from-orange-400 to-yellow-500 rounded-lg p-6 border-4 border-black shadow-lg">
-                    <div class="text-center">
+                <div class="bg-gradient-to-r from-orange-400 to-yellow-500 dark:bg-none dark:bg-zinc-800 rounded-lg p-6 border-4 border-black shadow-lg">
+                    <div class="relative text-center">
+                        <div class="absolute top-0 right-0">
+                            <ThemeToggle />
+                        </div>
                         <h1 class="text-4xl font-black text-white mb-1 flex items-center justify-center gap-2">
                             🍌 Nano<br />
                             <span class="text-yellow-100 text-5xl">Banana</span>
@@ -27,7 +30,7 @@
                         @click="showApiSettings = !showApiSettings"
                         :class="[
                             'px-6 py-3 rounded-lg border-4 border-black font-bold text-sm transition-all flex items-center gap-2 shadow-lg',
-                            apiKey ? 'bg-green-400 text-white hover:bg-green-500' : 'bg-red-400 text-white hover:bg-red-500 animate-pulse'
+                            apiKey ? 'bg-green-400 dark:bg-green-900 text-white dark:text-green-300 hover:bg-green-500 dark:hover:bg-green-800' : 'bg-red-400 dark:bg-red-900 text-white dark:text-red-300 hover:bg-red-500 dark:hover:bg-red-800 animate-pulse'
                         ]"
                     >
                         <span>🔑</span>
@@ -59,20 +62,20 @@
                 <!-- 灵感工坊 -->
                 <div class="flex flex-col h-full gap-4">
                     <div class="flex flex-col h-full">
-                        <div class="bg-gradient-to-r from-blue-400 to-purple-500 text-white font-bold px-4 py-2 rounded-t-lg border-4 border-black border-b-0 flex items-center gap-2">
+                        <div class="bg-gradient-to-r from-blue-400 to-purple-500 dark:bg-none dark:bg-zinc-700 text-white dark:text-gray-300 font-bold px-4 py-2 rounded-t-lg border-4 border-black border-b-0 flex items-center gap-2">
                             ✨ 文生图 · 灵感工坊
                         </div>
-                        <div class="bg-white border-4 border-black border-t-0 rounded-b-lg p-5 shadow-lg flex flex-col h-full gap-4">
+                        <div class="bg-white dark:bg-gray-800 border-4 border-black border-t-0 rounded-b-lg p-5 shadow-lg flex flex-col h-full gap-4">
                             <div class="flex flex-col gap-3 flex-1">
-                                <label class="font-bold flex items-center gap-2 text-base">🍌 输入你的创意描述：</label>
+                                <label class="font-bold flex items-center gap-2 text-base dark:text-gray-100">🍌 输入你的创意描述：</label>
                                 <textarea
                                     v-model="textToImagePrompt"
                                     placeholder="例如：阳光洒在香蕉形热气球上，漂浮在糖果色的天空中"
-                                    class="w-full px-4 py-3 border-2 border-black rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent min-h-[160px] flex-1"
+                                    class="w-full px-4 py-3 border-2 border-black dark:border-gray-600 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent min-h-[160px] flex-1 dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-500"
                                 />
                             </div>
 
-                            <p class="text-sm text-gray-600 font-medium flex items-center gap-2">
+                            <p class="text-sm text-gray-600 dark:text-gray-400 font-medium flex items-center gap-2">
                                 <span>💡</span>
                                 <span>填写描述后，使用下方按钮开始创作，生成的图片会展示在下方结果区，可直接下载或继续改图。</span>
                             </p>
@@ -81,7 +84,7 @@
 
                     <!-- 宽高比选择器（仅当选择 Gemini 2.5 Flash Image 系列模型时显示） -->
                     <div v-if="showAspectRatioSelector" class="flex flex-col">
-                        <div class="bg-gradient-to-r from-purple-400 to-pink-500 text-white font-bold px-4 py-2 rounded-t-lg border-4 border-black border-b-0 flex items-center gap-2">
+                        <div class="bg-gradient-to-r from-purple-400 to-pink-500 dark:bg-none dark:bg-zinc-700 text-white dark:text-gray-300 font-bold px-4 py-2 rounded-t-lg border-4 border-black border-b-0 flex items-center gap-2">
                             📐 图像宽高比
                         </div>
                         <AspectRatioSelector v-model="selectedAspectRatio" :model-type="activeImageModelType" :image-size="gemini3ImageSize" />
@@ -89,7 +92,7 @@
 
                     <!-- 图像尺寸配置（Gemini 3 Pro Image / Gemini 3.1 Flash Image 模型时显示） -->
                     <div v-if="showImageSizeConfig" class="flex flex-col">
-                        <div class="bg-gradient-to-r from-indigo-400 to-purple-500 text-white font-bold px-4 py-2 rounded-t-lg border-4 border-black border-b-0 flex items-center gap-2">
+                        <div class="bg-gradient-to-r from-indigo-400 to-purple-500 dark:bg-none dark:bg-zinc-700 text-white dark:text-gray-300 font-bold px-4 py-2 rounded-t-lg border-4 border-black border-b-0 flex items-center gap-2">
                             🚀 图像尺寸配置
                         </div>
                         <Gemini3ProConfig
@@ -104,14 +107,14 @@
                 <!-- 图文生图流程 -->
                 <div class="flex flex-col gap-4 h-full">
                     <div class="flex flex-col h-full">
-                        <div class="bg-pink-400 text-white font-bold px-4 py-2 rounded-t-lg border-4 border-black border-b-0 flex items-center gap-2">🍌 图文生图 · 上传图片</div>
+                        <div class="bg-pink-400 dark:bg-zinc-700 text-white dark:text-gray-300 font-bold px-4 py-2 rounded-t-lg border-4 border-black border-b-0 flex items-center gap-2">🍌 图文生图 · 上传图片</div>
                         <div class="flex-1">
                             <ImageUpload v-model="selectedImages" />
                         </div>
                     </div>
 
                     <div class="flex flex-col h-full">
-                        <div class="bg-gradient-to-r from-green-400 to-blue-500 text-white font-bold px-4 py-2 rounded-t-lg border-4 border-black border-b-0 flex items-center gap-2">
+                        <div class="bg-gradient-to-r from-green-400 to-blue-500 dark:bg-none dark:bg-zinc-700 text-white dark:text-gray-300 font-bold px-4 py-2 rounded-t-lg border-4 border-black border-b-0 flex items-center gap-2">
                             🎨 图文生图 · 选择风格或自定义提示词
                         </div>
                         <div class="flex-1">
@@ -130,8 +133,8 @@
                         :class="[
                             'flex-1 px-6 py-4 rounded-lg font-bold text-white text-lg transition-all duration-200 flex items-center justify-center gap-3 border-4 border-black shadow-lg',
                             canGenerateTextImage
-                                ? 'bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 hover:-translate-y-1 hover:shadow-xl'
-                                : 'bg-gray-400 cursor-not-allowed'
+                                ? 'bg-gradient-to-r from-purple-500 to-blue-500 dark:bg-none dark:bg-zinc-700 dark:text-gray-300 hover:from-purple-600 hover:to-blue-600 dark:hover:bg-zinc-600 hover:-translate-y-1 hover:shadow-xl'
+                                : 'bg-gray-400 dark:bg-zinc-700 dark:text-gray-500 cursor-not-allowed'
                         ]"
                     >
                         <span v-if="!isTextToImageLoading" class="flex items-center gap-2 text-xl">🍌 施展魔法（文生图）</span>
@@ -144,8 +147,8 @@
                         :class="[
                             'flex-1 px-6 py-4 rounded-lg font-bold text-white text-lg transition-all duration-200 flex items-center justify-center gap-3 border-4 border-black shadow-lg',
                             canGenerate
-                                ? 'bg-gradient-to-r from-orange-400 to-yellow-500 hover:from-orange-500 hover:to-yellow-600 hover:-translate-y-1 hover:shadow-xl'
-                                : 'bg-gray-400 cursor-not-allowed'
+                                ? 'bg-gradient-to-r from-orange-400 to-yellow-500 dark:bg-none dark:bg-zinc-700 dark:text-gray-300 hover:from-orange-500 hover:to-yellow-600 dark:hover:bg-zinc-600 hover:-translate-y-1 hover:shadow-xl'
+                                : 'bg-gray-400 dark:bg-zinc-700 dark:text-gray-500 cursor-not-allowed'
                         ]"
                     >
                         <span v-if="!isLoading" class="flex items-center gap-2 text-xl">🍌 施展魔法（图文生图）</span>
@@ -157,7 +160,7 @@
 
             <!-- 生成结果区域：全宽 -->
             <div class="w-full">
-                <div class="bg-black text-white font-bold px-4 py-2 rounded-t-lg border-4 border-black border-b-0 flex items-center justify-between gap-2">
+                <div class="bg-black dark:bg-zinc-800 text-white dark:text-gray-300 font-bold px-4 py-2 rounded-t-lg border-4 border-black dark:border-zinc-600 border-b-0 flex items-center justify-between gap-2">
                     <span>✨ 生成结果</span>
                     <div class="flex items-center gap-1 text-sm font-normal">
                         <span class="text-gray-300 mr-1">保存格式：</span>
@@ -196,6 +199,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
+import ThemeToggle from './components/ThemeToggle.vue'
 import ApiKeyInput from './components/ApiKeyInput.vue'
 import ImageUpload from './components/ImageUpload.vue'
 import StylePromptSelector from './components/StylePromptSelector.vue'

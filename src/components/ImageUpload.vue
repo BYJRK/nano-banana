@@ -1,5 +1,5 @@
 <template>
-    <div class="bg-white border-4 border-black border-t-0 rounded-b-lg p-4 shadow-lg h-full flex flex-col">
+    <div class="bg-white dark:bg-gray-800 border-4 border-black border-t-0 rounded-b-lg p-4 shadow-lg h-full flex flex-col">
         <!-- Upload Area -->
         <div
             ref="uploadArea"
@@ -10,7 +10,7 @@
             @drop.prevent="handleDrop"
             :class="[
                 'border-4 border-dashed rounded-lg p-6 text-center cursor-pointer transition-all duration-300 flex-1 flex flex-col justify-center',
-                isDragOver ? 'border-pink-400 bg-pink-50' : 'border-gray-300 bg-gray-50 hover:border-pink-400 hover:bg-pink-50'
+                isDragOver ? 'border-pink-400 bg-pink-50 dark:bg-pink-950' : 'border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 hover:border-pink-400 hover:bg-pink-50 dark:hover:bg-pink-950'
             ]"
         >
             <input ref="fileInput" type="file" accept="image/*" multiple class="hidden" @change="handleFileSelect" />
@@ -29,14 +29,14 @@
                 </div>
             </div>
 
-            <h3 class="text-lg font-bold mb-2 flex items-center justify-center gap-2">🍌 拖拽上传</h3>
-            <p class="text-gray-600 mb-1">或点击浏览文件</p>
-            <p class="text-sm text-gray-500">支持多张图片 JPG, PNG, GIF 格式 (最大 5MB)</p>
+            <h3 class="text-lg font-bold mb-2 flex items-center justify-center gap-2 dark:text-gray-100">🍌 拖拽上传</h3>
+            <p class="text-gray-600 dark:text-gray-400 mb-1">或点击浏览文件</p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">支持多张图片 JPG, PNG, GIF 格式 (最大 5MB)</p>
         </div>
 
         <!-- Thumbnails -->
         <div v-if="thumbnails.length > 0" class="grid grid-cols-4 gap-3 mt-4">
-            <div v-for="(thumbnail, index) in thumbnails" :key="index" class="relative aspect-square bg-gray-100 rounded-lg overflow-hidden group border-2 border-black">
+            <div v-for="(thumbnail, index) in thumbnails" :key="index" class="relative aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden group border-2 border-black">
                 <img :src="thumbnail" :alt="`Image ${index + 1}`" class="w-full h-full object-cover" />
                 <button
                     @click="removeThumbnail(index)"

@@ -1,12 +1,12 @@
 <template>
-    <div class="bg-white border-4 border-black border-t-0 rounded-b-lg p-4 shadow-lg h-full flex flex-col">
+    <div class="bg-white dark:bg-gray-800 border-4 border-black border-t-0 rounded-b-lg p-4 shadow-lg h-full flex flex-col">
         <!-- 选择模式的标签页 -->
-        <div class="flex mb-4 bg-gray-100 rounded-lg p-1 border-2 border-black">
+        <div class="flex mb-4 bg-gray-100 dark:bg-gray-700 rounded-lg p-1 border-2 border-black">
             <button
                 @click="activeTab = 'style'"
                 :class="[
                     'flex-1 py-2 px-3 rounded-md font-bold transition-all flex items-center justify-center gap-2',
-                    activeTab === 'style' ? 'bg-yellow-300 text-black' : 'text-gray-600 hover:text-black'
+                    activeTab === 'style' ? 'bg-yellow-300 text-black' : 'text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white'
                 ]"
             >
                 🎨 预设风格
@@ -15,7 +15,7 @@
                 @click="activeTab = 'custom'"
                 :class="[
                     'flex-1 py-2 px-3 rounded-md font-bold transition-all flex items-center justify-center gap-2',
-                    activeTab === 'custom' ? 'bg-yellow-300 text-black' : 'text-gray-600 hover:text-black'
+                    activeTab === 'custom' ? 'bg-yellow-300 text-black' : 'text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white'
                 ]"
             >
                 ✏️ 自定义提示词
@@ -30,7 +30,7 @@
                 @click="selectStyle(template.id)"
                 :class="[
                     'p-4 rounded-lg border-2 border-black cursor-pointer transition-all',
-                    selectedStyle === template.id ? 'bg-yellow-300 border-orange-500' : 'bg-yellow-50 hover:bg-yellow-100'
+                    selectedStyle === template.id ? 'bg-yellow-300 border-orange-500' : 'bg-yellow-50 dark:bg-gray-700 hover:bg-yellow-100 dark:hover:bg-gray-600'
                 ]"
             >
                 <div class="flex items-start gap-3">
@@ -39,18 +39,18 @@
 
                     <!-- 内容 -->
                     <div class="flex-1 min-w-0">
-                        <div class="text-base font-bold mb-1">{{ template.title }}</div>
-                        <p class="text-sm text-gray-600 mb-2">{{ template.description }}</p>
+                        <div class="text-base font-bold mb-1 dark:text-gray-100">{{ template.title }}</div>
+                        <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">{{ template.description }}</p>
 
                         <!-- 可展开的提示词预览 -->
                         <details class="group">
-                            <summary class="cursor-pointer text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1">
+                            <summary class="cursor-pointer text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 flex items-center gap-1">
                                 <span>查看完整提示词</span>
                                 <svg class="w-3 h-3 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
                                 </svg>
                             </summary>
-                            <div class="mt-2 p-2 bg-gray-100 rounded text-xs text-gray-700 border">
+                            <div class="mt-2 p-2 bg-gray-100 dark:bg-gray-600 rounded text-xs text-gray-700 dark:text-gray-300 border dark:border-gray-500">
                                 {{ template.prompt }}
                             </div>
                         </details>
@@ -61,16 +61,16 @@
 
         <!-- 自定义提示词 -->
         <div v-else class="flex flex-col gap-3 flex-1">
-            <label class="font-bold flex items-center gap-2">🍌 描述你的创意想法：</label>
+            <label class="font-bold flex items-center gap-2 dark:text-gray-100">🍌 描述你的创意想法：</label>
 
             <textarea
                 :value="customPrompt"
                 @input="updateCustomPrompt(($event.target as HTMLTextAreaElement).value)"
                 placeholder="例如：将图片转换为超现实主义风格，加入漂浮的香蕉和鲜艳的色彩..."
-                class="w-full px-4 py-3 border-2 border-black rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent flex-1 min-h-[160px]"
+                class="w-full px-4 py-3 border-2 border-black dark:border-gray-600 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent flex-1 min-h-[160px] dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-500"
             />
 
-            <p class="text-sm text-gray-600 font-medium flex items-center gap-1">💡 描述越具体，效果越好！</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400 font-medium flex items-center gap-1">💡 描述越具体，效果越好！</p>
         </div>
     </div>
 </template>

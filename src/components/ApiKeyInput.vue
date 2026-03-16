@@ -1,23 +1,23 @@
 <template>
-    <div class="bg-white border-4 border-black rounded-lg p-3 shadow-lg">
+    <div class="bg-white dark:bg-gray-800 border-4 border-black rounded-lg p-3 shadow-lg">
         <div class="mb-2">
-            <h3 class="font-bold text-gray-800 flex items-center gap-2 mb-2">
+            <h3 class="font-bold text-gray-800 dark:text-gray-100 flex items-center gap-2 mb-2">
                 🔑 API 配置
-                <span v-if="modelValue" class="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full">密钥已保存</span>
+                <span v-if="modelValue" class="text-xs bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 px-2 py-1 rounded-full">密鑰已保存</span>
             </h3>
-            <p class="text-sm text-gray-600">可自定义 API 密钥与端点，默认使用 OpenRouter</p>
+            <p class="text-sm text-gray-600 dark:text-gray-400">可自定义 API 密鑰与端点，默认使用 OpenRouter</p>
         </div>
 
         <div class="space-y-3">
             <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1">API 密钥</label>
+                <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">API 密鑰</label>
                 <div class="flex gap-2">
                     <input
                         type="password"
                         :value="modelValue"
                         @input="$emit('update:modelValue', ($event.target as HTMLInputElement).value)"
-                        placeholder="输入你的 OpenRouter API 密钥..."
-                        class="flex-1 px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                        placeholder="输入你的 OpenRouter API 密鑰..."
+                        class="flex-1 px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-500"
                     />
                     <button
                         v-if="modelValue"
@@ -29,22 +29,22 @@
                     </button>
                 </div>
                 <div class="flex items-center justify-between mt-1">
-                    <p class="text-xs text-gray-500">
-                        从 <a href="https://openrouter.ai/" target="_blank" class="text-orange-500 hover:underline font-medium">OpenRouter.ai</a> 获取你的 API 密钥
+                    <p class="text-xs text-gray-500 dark:text-gray-400">
+                        从 <a href="https://openrouter.ai/" target="_blank" class="text-orange-500 hover:underline font-medium">OpenRouter.ai</a> 获取你的 API 密鑰
                     </p>
-                    <p v-if="modelValue" class="text-xs text-green-600 flex items-center gap-1">💾 已自动保存到本地</p>
+                    <p v-if="modelValue" class="text-xs text-green-600 dark:text-green-400 flex items-center gap-1">💾 已自动保存到本地</p>
                 </div>
             </div>
 
             <div>
-                <label class="block text-xs font-semibold text-gray-600 mb-1">API 端点</label>
+                <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">API 端点</label>
                 <div class="flex gap-2">
                     <input
                         type="text"
                         :value="endpoint"
                         @input="$emit('update:endpoint', ($event.target as HTMLInputElement).value)"
                         placeholder="例如 https://openrouter.ai/api/v1/chat/completions"
-                        class="flex-1 px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                        class="flex-1 px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm dark:bg-gray-700 dark:text-gray-100 dark:placeholder-gray-500"
                     />
                     <button
                         v-if="isCustomEndpoint"
@@ -55,7 +55,7 @@
                         ♻️
                     </button>
                 </div>
-                <p class="text-xs text-gray-500 mt-1">如果你的模型提供方与 OpenRouter 不同，可在此填写自定义地址</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">如果你的模型提供方与 OpenRouter 不同，可在此填写自定义地址</p>
             </div>
 
             <div>
@@ -80,17 +80,17 @@
                 <p v-if="modelError" class="text-xs text-red-600 mt-2">⚠️ {{ modelError }}</p>
 
                 <div class="mt-3">
-                    <label class="block text-xs font-semibold text-gray-600 mb-1">选择文生图模型</label>
+                    <label class="block text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">选择文生图模型</label>
                     <select
                         :value="model"
                         @change="handleModelChange"
-                        class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+                        class="w-full px-3 py-2 border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm dark:bg-gray-700 dark:text-gray-100"
                     >
                         <option v-for="item in optionList" :key="item.id" :value="item.id">
                             {{ item.supportsImages ? '🖼️ ' : '' }}{{ item.label }}
                         </option>
                     </select>
-                    <p v-if="selectedModelInfo" class="text-xs text-gray-500 mt-1">{{ selectedModelInfo }}</p>
+                    <p v-if="selectedModelInfo" class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ selectedModelInfo }}</p>
                 </div>
             </div>
         </div>
