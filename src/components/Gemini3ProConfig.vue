@@ -16,9 +16,8 @@
             </select>
         </div>
 
-  
         <!-- Google Search Toggle -->
-        <div>
+        <div v-if="showGoogleSearch !== false">
             <label class="flex items-center gap-3 cursor-pointer">
                 <input
                     type="checkbox"
@@ -36,7 +35,7 @@
         </div>
 
         <p class="text-xs text-gray-500 mt-2">
-            💡 Gemini 3 Pro Image 专用配置，同时作用于「文生图」与「图文生图」功能
+            💡 该配置同时作用于「文生图」与「图文生图」功能
         </p>
     </div>
 </template>
@@ -45,6 +44,7 @@
 defineProps<{
     imageSize: string
     enableGoogleSearch: boolean
+    showGoogleSearch?: boolean
 }>()
 
 defineEmits<{

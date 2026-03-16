@@ -84,17 +84,18 @@
                         <div class="bg-gradient-to-r from-purple-400 to-pink-500 text-white font-bold px-4 py-2 rounded-t-lg border-4 border-black border-b-0 flex items-center gap-2">
                             📐 图像宽高比
                         </div>
-                        <AspectRatioSelector v-model="selectedAspectRatio" :model-type="showGemini3ProConfig ? 'gemini-3-pro-image' : 'default'" :image-size="gemini3ImageSize" />
+                        <AspectRatioSelector v-model="selectedAspectRatio" :model-type="showImageSizeConfig ? 'gemini-3-pro-image' : 'default'" :image-size="gemini3ImageSize" />
                     </div>
 
-                    <!-- Gemini 3 Pro Image 配置（仅当选择 Gemini 3 Pro Image 模型时显示） -->
-                    <div v-if="showGemini3ProConfig" class="flex flex-col">
+                    <!-- 图像尺寸配置（Gemini 3 Pro Image / Gemini 3.1 Flash Image 模型时显示） -->
+                    <div v-if="showImageSizeConfig" class="flex flex-col">
                         <div class="bg-gradient-to-r from-indigo-400 to-purple-500 text-white font-bold px-4 py-2 rounded-t-lg border-4 border-black border-b-0 flex items-center gap-2">
-                            🚀 Gemini 3 Pro Image 配置
+                            🚀 图像尺寸配置
                         </div>
                         <Gemini3ProConfig
                             v-model:imageSize="gemini3ImageSize"
                             v-model:enableGoogleSearch="gemini3EnableGoogleSearch"
+                            :show-google-search="showGemini3ProConfig"
                         />
                     </div>
                 </div>
@@ -534,7 +535,7 @@ const canGenerate = computed(
         !isLoading.value
 )
 
-// 判断是否显示宽高比选择器（Gemini 2.5 Flash Image 系列和 Gemini 3 Pro Image 模型时显示）
+// 判断是否显示宽高比选择器（Gemini 2.5 Flash Image 系列、Gemini 3 Pro Image 和 Gemini 3.1 Flash Image 模型时显示）
 const showAspectRatioSelector = computed(() => {
     const modelId = selectedModel.value.toLowerCase().trim()
     if (!modelId) return false
@@ -543,10 +544,18 @@ const showAspectRatioSelector = computed(() => {
     const normalizedId = segments[segments.length - 1]
     return normalizedId === 'gemini-2.5-flash-image' ||
            normalizedId === 'gemini-2.5-flash-image-preview' ||
-           modelId.includes('gemini-3-pro-image')
+           modelId.includes('gemini-3-pro-image') ||
+           modelId.includes('gemini-3.1-flash-image')
 })
 
-// 判断是否显示 Gemini 3 Pro Image 配置
+// 判断是否显示图像尺寸配置（支持 imageSize 参数的模型）
+const showImageSizeConfig = computed(() => {
+    const modelId = selectedModel.value.toLowerCase().trim()
+    if (!modelId) return false
+    return modelId.includes('gemini-3-pro-image') || modelId.includes('gemini-3.1-flash-image')
+})
+
+// 判断是否显示 Gemini 3 Pro Image 专属配置（谷歌搜索等）
 const showGemini3ProConfig = computed(() => {
     const modelId = selectedModel.value.toLowerCase().trim()
     if (!modelId) return false
@@ -618,9 +627,13 @@ const handleTextToImageGenerate = async () => {
             request.aspectRatio = selectedAspectRatio.value
         }
 
-        // 如果显示 Gemini 3 Pro Image 配置，则添加相应参数
-        if (showGemini3ProConfig.value) {
+        // 如果模型支持 imageSize 参数，则添加
+        if (showImageSizeConfig.value) {
             request.imageSize = gemini3ImageSize.value
+        }
+
+        // 如果是 Gemini 3 Pro Image，则添加谷歌搜索参数
+        if (showGemini3ProConfig.value) {
             request.enableGoogleSearch = gemini3EnableGoogleSearch.value
         }
 
@@ -713,9 +726,13 @@ const handleGenerate = async () => {
             request.aspectRatio = selectedAspectRatio.value
         }
 
-        // 如果显示 Gemini 3 Pro Image 配置，则添加相应参数
-        if (showGemini3ProConfig.value) {
+        // 如果模型支持 imageSize 参数，则添加
+        if (showImageSizeConfig.value) {
             request.imageSize = gemini3ImageSize.value
+        }
+
+        // 如果是 Gemini 3 Pro Image，则添加谷歌搜索参数
+        if (showGemini3ProConfig.value) {
             request.enableGoogleSearch = gemini3EnableGoogleSearch.value
         }
 

@@ -11,8 +11,9 @@ export async function generateImage(request: GenerateRequest, maxRetries: number
             const apiEndpoint = request.endpoint?.trim() || DEFAULT_API_ENDPOINT
             const modelId = request.model?.trim() || DEFAULT_MODEL_ID
 
-            // 检查是否是 Gemini 3 Pro Image 模型
+            // 检查模型能力标志
             const isGemini3ProImage = modelId.toLowerCase().includes('gemini-3-pro-image')
+            const supportsImageSize = isGemini3ProImage || modelId.toLowerCase().includes('gemini-3.1-flash-image')
 
             let payload: Record<string, unknown>
 
@@ -47,14 +48,14 @@ export async function generateImage(request: GenerateRequest, maxRetries: number
                 imageConfig.aspect_ratio = request.aspectRatio
             }
 
-            // 如果是 Gemini 3 Pro Image 模型，添加额外参数
-            if (isGemini3ProImage) {
-                if (request.imageSize) {
-                    imageConfig.image_size = request.imageSize
-                }
-                if (request.enableGoogleSearch) {
-                    payload.tools = [{ google_search: {} }]
-                }
+            // 支持 imageSize 的模型添加尺寸参数
+            if (supportsImageSize && request.imageSize) {
+                imageConfig.image_size = request.imageSize
+            }
+
+            // 仅 Gemini 3 Pro Image 支持谷歌搜索
+            if (isGemini3ProImage && request.enableGoogleSearch) {
+                payload.tools = [{ google_search: {} }]
             }
 
             // 如果有 image_config 参数，添加到 payload
