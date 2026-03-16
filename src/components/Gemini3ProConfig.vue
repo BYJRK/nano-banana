@@ -10,6 +10,8 @@
                 @change="$emit('update:imageSize', ($event.target as HTMLInputElement).value)"
                 class="w-full px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm font-medium"
             >
+                <!-- 512 (0.5K) 暂时屏蔽，等 OpenRouter 修复后启用 -->
+                <!-- <option v-if="modelType === 'gemini-3.1-flash-image'" value="0.5K">512 - 低分辨率</option> -->
                 <option value="1K">1K - 标准清晰度</option>
                 <option value="2K">2K - 高清晰度</option>
                 <option value="4K">4K - 超高清晰度</option>
@@ -45,6 +47,7 @@ defineProps<{
     imageSize: string
     enableGoogleSearch: boolean
     showGoogleSearch?: boolean
+    modelType?: string
 }>()
 
 defineEmits<{

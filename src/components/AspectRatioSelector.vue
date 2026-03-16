@@ -37,6 +37,74 @@ defineEmits<{
     'update:modelValue': [value: string]
 }>()
 
+// Gemini 3.1 Flash Image 不同分辨率下的基础数据（0.5K / 1K / 2K / 4K，支持 14 种宽高比）
+const gemini31FlashImageData = {
+    '0.5K': {
+        '1:1':  { width: 512,  height: 512  },
+        '1:4':  { width: 256,  height: 1024 },
+        '1:8':  { width: 192,  height: 1536 },
+        '2:3':  { width: 424,  height: 632  },
+        '3:2':  { width: 632,  height: 424  },
+        '3:4':  { width: 448,  height: 600  },
+        '4:1':  { width: 1024, height: 256  },
+        '4:3':  { width: 600,  height: 448  },
+        '4:5':  { width: 464,  height: 576  },
+        '5:4':  { width: 576,  height: 464  },
+        '8:1':  { width: 1536, height: 192  },
+        '9:16': { width: 384,  height: 688  },
+        '16:9': { width: 688,  height: 384  },
+        '21:9': { width: 792,  height: 168  }
+    },
+    '1K': {
+        '1:1':  { width: 1024, height: 1024 },
+        '1:4':  { width: 512,  height: 2048 },
+        '1:8':  { width: 384,  height: 3072 },
+        '2:3':  { width: 848,  height: 1264 },
+        '3:2':  { width: 1264, height: 848  },
+        '3:4':  { width: 896,  height: 1200 },
+        '4:1':  { width: 2048, height: 512  },
+        '4:3':  { width: 1200, height: 896  },
+        '4:5':  { width: 928,  height: 1152 },
+        '5:4':  { width: 1152, height: 928  },
+        '8:1':  { width: 3072, height: 384  },
+        '9:16': { width: 768,  height: 1376 },
+        '16:9': { width: 1376, height: 768  },
+        '21:9': { width: 1584, height: 672  }
+    },
+    '2K': {
+        '1:1':  { width: 2048, height: 2048 },
+        '1:4':  { width: 1024, height: 4096 },
+        '1:8':  { width: 768,  height: 6144 },
+        '2:3':  { width: 1696, height: 2528 },
+        '3:2':  { width: 2528, height: 1696 },
+        '3:4':  { width: 1792, height: 2400 },
+        '4:1':  { width: 4096, height: 1024 },
+        '4:3':  { width: 2400, height: 1792 },
+        '4:5':  { width: 1856, height: 2304 },
+        '5:4':  { width: 2304, height: 1856 },
+        '8:1':  { width: 6144, height: 768  },
+        '9:16': { width: 1536, height: 2752 },
+        '16:9': { width: 2752, height: 1536 },
+        '21:9': { width: 3168, height: 1344 }
+    },
+    '4K': {
+        '1:1':  { width: 4096,  height: 4096  },
+        '1:4':  { width: 2048,  height: 8192  },
+        '1:8':  { width: 1536,  height: 12288 },
+        '2:3':  { width: 3392,  height: 5056  },
+        '3:2':  { width: 5056,  height: 3392  },
+        '3:4':  { width: 3584,  height: 4800  },
+        '4:1':  { width: 8192,  height: 2048  },
+        '4:3':  { width: 4800,  height: 3584  },
+        '4:5':  { width: 3712,  height: 4608  },
+        '5:4':  { width: 4608,  height: 3712  },
+        '8:1':  { width: 12288, height: 1536  },
+        '9:16': { width: 3072,  height: 5504  },
+        '16:9': { width: 5504,  height: 3072  },
+        '21:9': { width: 6336,  height: 2688  }
+    }
+}
+
 // Gemini 3 Pro Image 不同分辨率下的基础数据
 const gemini3ProImageData = {
     '1K': {
@@ -93,6 +161,14 @@ const defaultAspectRatioOptions: AspectRatioOption[] = [
 
 // 根据模型类型和图像尺寸生成动态宽高比选项
 const aspectRatioOptions = computed(() => {
+    if (props.modelType === 'gemini-3.1-flash-image' && props.imageSize && gemini31FlashImageData[props.imageSize as keyof typeof gemini31FlashImageData]) {
+        const sizeData = gemini31FlashImageData[props.imageSize as keyof typeof gemini31FlashImageData]
+        return Object.entries(sizeData).map(([ratio, dimensions]) => ({
+            value: ratio,
+            label: `${ratio} - ${dimensions.width}x${dimensions.height}`,
+            resolution: `${dimensions.width}x${dimensions.height}`
+        }))
+    }
     if (props.modelType === 'gemini-3-pro-image' && props.imageSize && gemini3ProImageData[props.imageSize as keyof typeof gemini3ProImageData]) {
         const sizeData = gemini3ProImageData[props.imageSize as keyof typeof gemini3ProImageData]
         return Object.entries(sizeData).map(([ratio, dimensions]) => ({

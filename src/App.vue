@@ -84,7 +84,7 @@
                         <div class="bg-gradient-to-r from-purple-400 to-pink-500 text-white font-bold px-4 py-2 rounded-t-lg border-4 border-black border-b-0 flex items-center gap-2">
                             📐 图像宽高比
                         </div>
-                        <AspectRatioSelector v-model="selectedAspectRatio" :model-type="showImageSizeConfig ? 'gemini-3-pro-image' : 'default'" :image-size="gemini3ImageSize" />
+                        <AspectRatioSelector v-model="selectedAspectRatio" :model-type="activeImageModelType" :image-size="gemini3ImageSize" />
                     </div>
 
                     <!-- 图像尺寸配置（Gemini 3 Pro Image / Gemini 3.1 Flash Image 模型时显示） -->
@@ -96,6 +96,7 @@
                             v-model:imageSize="gemini3ImageSize"
                             v-model:enableGoogleSearch="gemini3EnableGoogleSearch"
                             :show-google-search="showGemini3ProConfig"
+                            :model-type="activeImageModelType"
                         />
                     </div>
                 </div>
@@ -560,6 +561,14 @@ const showGemini3ProConfig = computed(() => {
     const modelId = selectedModel.value.toLowerCase().trim()
     if (!modelId) return false
     return modelId.includes('gemini-3-pro-image')
+})
+
+// 返回当前激活的图像模型类型标识，传给子组件
+const activeImageModelType = computed(() => {
+    const modelId = selectedModel.value.toLowerCase().trim()
+    if (modelId.includes('gemini-3-pro-image')) return 'gemini-3-pro-image'
+    if (modelId.includes('gemini-3.1-flash-image')) return 'gemini-3.1-flash-image'
+    return 'default'
 })
 
 const isAbortError = (err: unknown): err is Error =>
