@@ -28,7 +28,7 @@
             <div v-else-if="results && results.length > 0" class="w-full">
                 <div class="grid gap-4" :class="gridClass">
                     <div v-for="(img, index) in results" :key="`${img}-${index}`" class="relative group">
-                        <img :src="img" alt="生成的艺术作品" class="w-full rounded-lg border-2 border-black shadow-lg object-contain" @load="e => onImageLoad(e, img)" />
+                        <img :src="img" alt="生成的艺术作品" class="w-full max-h-[400px] rounded-lg border-2 border-black shadow-lg object-contain" @load="e => onImageLoad(e, img)" />
                         <div v-if="imageSizes[img]" class="mt-1 text-center text-xs text-gray-500 dark:text-gray-400 font-mono">
                             {{ imageSizes[img] }}
                         </div>
