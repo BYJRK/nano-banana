@@ -573,13 +573,14 @@ const maybeRequestNotificationPermission = () => {
     }
 }
 
-const notifyGenerationComplete = (count: number, sourceLabel: string) => {
+const notifyGenerationComplete = (count: number, sourceLabel: string, elapsedMs?: number) => {
     if (typeof window === 'undefined') return
     if (!('Notification' in window)) return
     if (Notification.permission !== 'granted') return
 
     const title = '🍌 生成完成'
-    const body = `已完成${sourceLabel}，共生成 ${count} 张图片。`
+    const elapsed = elapsedMs != null ? `（耗时 ${(elapsedMs / 1000).toFixed(1)}s）` : ''
+    const body = `已完成${sourceLabel}，共生成 ${count} 张图片${elapsed}。`
     try {
         new Notification(title, { body })
     } catch {
@@ -612,6 +613,7 @@ const handleTextToImageGenerate = async () => {
     isTextToImageLoading.value = true
     textToImageError.value = null
     textToImageResult.value = []
+    const textToImageStartTime = Date.now()
 
     try {
         const request: GenerateRequest = {
@@ -641,7 +643,7 @@ const handleTextToImageGenerate = async () => {
         textToImageResult.value = response.imageUrls
         latestResultSource.value = 'text'
         if (response.imageUrls.length > 0) {
-            notifyGenerationComplete(response.imageUrls.length, '文生图')
+            notifyGenerationComplete(response.imageUrls.length, '文生图', Date.now() - textToImageStartTime)
         }
     } catch (err) {
         if (isAbortError(err)) {
@@ -708,6 +710,7 @@ const handleGenerate = async () => {
     error.value = null
     // 立即清除之前的结果，确保用户看到新的生成过程
     result.value = []
+    const imageToImageStartTime = Date.now()
 
     try {
         // 使用选中的样式模板或自定义提示词
@@ -740,7 +743,7 @@ const handleGenerate = async () => {
         result.value = response.imageUrls
         latestResultSource.value = 'image'
         if (response.imageUrls.length > 0) {
-            notifyGenerationComplete(response.imageUrls.length, '图文生图')
+            notifyGenerationComplete(response.imageUrls.length, '图文生图', Date.now() - imageToImageStartTime)
         }
     } catch (err) {
         if (isAbortError(err)) {
