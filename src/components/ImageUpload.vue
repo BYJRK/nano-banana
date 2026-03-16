@@ -36,8 +36,27 @@
 
         <!-- Thumbnails -->
         <div v-if="thumbnails.length > 0" class="grid grid-cols-4 gap-3 mt-4">
-            <div v-for="(thumbnail, index) in thumbnails" :key="index" class="relative aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden group border-2 border-black">
-                <img :src="thumbnail" :alt="`Image ${index + 1}`" class="w-full h-full object-cover" />
+            <div
+                v-for="(thumbnail, index) in thumbnails"
+                :key="index"
+                class="relative aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg overflow-hidden group border-2 transition-all duration-150 cursor-grab active:cursor-grabbing"
+                :class="[
+                    dragOverIndex === index && dragItemIndex !== index
+                        ? 'border-pink-400 scale-105 shadow-lg'
+                        : 'border-black',
+                    dragItemIndex === index ? 'opacity-40' : ''
+                ]"
+                draggable="true"
+                @dragstart="onThumbnailDragStart(index, $event)"
+                @dragover.prevent.stop="onThumbnailDragOver(index)"
+                @drop.prevent.stop="onThumbnailDrop(index)"
+                @dragend="onThumbnailDragEnd"
+            >
+                <img :src="thumbnail" :alt="`Image ${index + 1}`" class="w-full h-full object-cover pointer-events-none" />
+                <!-- drag handle indicator -->
+                <div class="absolute bottom-1 left-1/2 -translate-x-1/2 text-white text-xs bg-black/50 rounded px-1 opacity-0 group-hover:opacity-100 transition-opacity select-none pointer-events-none">
+                    ⠿
+                </div>
                 <button
                     @click="removeThumbnail(index)"
                     class="absolute top-1 right-1 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center text-sm font-bold opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600"
@@ -63,6 +82,8 @@ const emit = defineEmits<{
 const fileInput = ref<HTMLInputElement>()
 const uploadArea = ref<HTMLElement>()
 const isDragOver = ref(false)
+const dragItemIndex = ref<number | null>(null)
+const dragOverIndex = ref<number | null>(null)
 
 const thumbnails = computed(() => props.modelValue)
 
@@ -114,5 +135,32 @@ const handleFiles = (files: File[]) => {
 const removeThumbnail = (index: number) => {
     const newImages = props.modelValue.filter((_, i) => i !== index)
     emit('update:modelValue', newImages)
+}
+
+const onThumbnailDragStart = (index: number, event: DragEvent) => {
+    dragItemIndex.value = index
+    if (event.dataTransfer) {
+        event.dataTransfer.effectAllowed = 'move'
+        event.dataTransfer.setData('text/plain', String(index))
+    }
+}
+
+const onThumbnailDragOver = (index: number) => {
+    dragOverIndex.value = index
+}
+
+const onThumbnailDrop = (index: number) => {
+    if (dragItemIndex.value === null || dragItemIndex.value === index) return
+    const newImages = [...props.modelValue]
+    const [moved] = newImages.splice(dragItemIndex.value, 1)
+    newImages.splice(index, 0, moved)
+    emit('update:modelValue', newImages)
+    dragItemIndex.value = null
+    dragOverIndex.value = null
+}
+
+const onThumbnailDragEnd = () => {
+    dragItemIndex.value = null
+    dragOverIndex.value = null
 }
 </script>
